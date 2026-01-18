@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Just Something I Wanted to Say</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /* Score HUD */
+    .score-board {
+        position: fixed;
+        top: 15px;
+        right: 20px;
+        background: rgba(255,255,255,0.9);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        z-index: 1000;
+    }
+
+    /* Center Card */
+    .love-card {
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 20px;
+        padding: 40px 30px;
+        max-width: 480px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        animation: fadeScale 1.2s ease-out;
+        z-index: 2;
+    }
+
+    @keyframes fadeScale {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .love-card h1 {
+        font-weight: 600;
+        font-size: 26px;
+        color: #2c2c2c;
+        margin-bottom: 15px;
+    }
+
+    .love-card p {
+        font-size: 16px;
+        color: #333;
+        line-height: 1.7;
+    }
+
+    .signature {
+        margin-top: 25px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    /* Floating hearts */
+    .heart {
+        position: absolute;
+        bottom: -20px;
+        font-size: 20px;
+        animation: floatUp 7s linear forwards;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    @keyframes floatUp {
+        from {
+            transform: translateY(0);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(-110vh);
+            opacity: 1;
+        }
+    }
+
+    /* Pop animation */
+    .pop {
+        animation: pop 0.4s ease forwards;
+    }
+
+    @keyframes pop {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.6); }
+        100% { transform: scale(0); opacity: 0; }
+    }
+</style>
+</head>
+<body>
+
+<!-- Score -->
+<div class="score-board">
+    💖 Score: <span id="score">0</span>
+</div>
+
+<!-- Message Card -->
+<div class="love-card">
+    <h1>Hello 👋</h1>
+    <p>
+        I really admire your honesty and the way you stand for what you believe in.
+        <br><br>
+        Can’t wait to spend time with you today 😊
+    </p>
+    <div class="signature">
+        — From one web developer to another 💻✨
+    </div>
+</div>
+
+<script>
+    const hearts = ["💖","💗","💜","💛"];
+    let score = 0;
+
+    function updateScore() {
+        document.getElementById("score").innerText = score;
+    }
+
+    setInterval(() => {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        heart.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = (16 + Math.random() * 10) + "px";
+        heart.dataset.popped = "false";
+
+        heart.addEventListener("click", () => {
+            if (heart.dataset.popped === "false") {
+                heart.dataset.popped = "true";
+                score++;
+                updateScore();
+                heart.classList.add("pop");
+                setTimeout(() => heart.remove(), 400);
+            }
+        });
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+            if (heart.parentNode) heart.remove();
+        }, 7000);
+
+    }, 650);
+</script>
+
+</body>
+</html>
