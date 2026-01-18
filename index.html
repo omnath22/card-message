@@ -94,6 +94,7 @@
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
     text-shadow: 0 0 6px rgba(255,255,255,0.8);
     transform-origin: center;
+    
 }
 
 @keyframes floatUp {
@@ -206,7 +207,10 @@
     font-weight: 600;
     margin: 10px 0;
 }
-
+#mainContent{
+display:none;
+justify-content:center;
+}
 </style>
 </head>
 <body>
@@ -218,7 +222,7 @@
         <small>Just a little patience 😊</small>
     </div>
 </div>
-<div id="mainContent" style="display:none;">
+<div id="mainContent">
 
 <!-- Score -->
 <div class="score-board">
@@ -282,7 +286,7 @@ function unlockContent() {
 
     gameUnlocked = true;
     document.getElementById("waitingScreen").style.display = "none";
-    document.getElementById("mainContent").style.display = "block";
+    document.getElementById("mainContent").style.display = "flex";
     startGame();
 }
 function spawnHeartWithSpeed() {
