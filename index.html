@@ -387,7 +387,7 @@ function startGame() {
     
     function getMsUntilTargetIST(hour, minute) {
     const now = new Date();
-now.setDate(now.getDate() + 1);
+//now.setDate(now.getDate() + 1);
     // Convert now → IST
     const utcNow = now.getTime() + now.getTimezoneOffset() * 60000;
     const istNow = new Date(utcNow + 5.5 * 60 * 60 * 1000);
