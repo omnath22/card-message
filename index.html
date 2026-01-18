@@ -34,6 +34,12 @@
         font-size: 14px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         z-index: 1000;
+		    -webkit-user-select: none; /* iOS Safari */
+    -ms-user-select: none;     /* IE/Edge */
+    user-select: none;         /* Standard */
+
+    -webkit-touch-callout: none; /* Disable iOS copy menu */
+    touch-action: manipulation; /* Prevent long-press selection */
     }
 
     /* Center Card */
