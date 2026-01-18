@@ -80,15 +80,21 @@
     }
 
     /* Floating hearts */
-    .heart {
-        position: absolute;
-        bottom: -20px;
-        font-size: 20px;
-        animation: floatUp 7s linear forwards;
-        cursor: pointer;
-        user-select: none;
-         z-index: 10;
-    }
+.heart {
+    position: absolute;
+    bottom: -20px;
+    font-size: 22px;
+    animation: floatUp 7s linear forwards;
+    cursor: pointer;
+    user-select: none;
+    z-index: 6;
+
+    /* clarity boost */
+    opacity: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    text-shadow: 0 0 6px rgba(255,255,255,0.8);
+    transform-origin: center;
+}
 
 @keyframes floatUp {
     0% {
@@ -114,20 +120,116 @@
         50% { transform: scale(1.6); }
         100% { transform: scale(0); opacity: 0; }
     }
+    /* Hearts Layer - sits above card */
+#hearts-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none; /* clicks pass through except hearts */
+    z-index: 5;
+}
+
+.heart {
+    pointer-events: auto; /* hearts still clickable */
+}
+/* Game Over Screen */
+.game-over {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.game-over.hidden {
+    display: none;
+}
+
+.game-over-card {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    animation: popIn 0.5s ease-out;
+}
+
+.game-over-card h2 {
+    margin-bottom: 10px;
+}
+
+.final-score {
+    font-size: 40px;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+.game-over {
+    cursor: pointer;
+}
+
+.game-over-card {
+    cursor: default;
+}
+.waiting-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.waiting-card {
+    background: rgba(255,255,255,0.95);
+    padding: 30px 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: fadeScale 1s ease-out;
+}
+
+.waiting-card .time {
+    font-size: 26px;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
 </style>
 </head>
 <body>
+<div id="waitingScreen" class="waiting-screen">
+    <div class="waiting-card">
+        <h2>🎬 Almost Time</h2>
+        <p>This page will unlock at</p>
+        <div class="time">12:40 PM IST</div>
+        <small>Just a little patience 😊</small>
+    </div>
+</div>
+<div id="mainContent" style="display:none;">
 
 <!-- Score -->
 <div class="score-board">
     💖 Score: <span id="score">0</span>
 </div>
-
+<div id="hearts-layer"></div>
 <!-- Message Card -->
 <div class="love-card">
     <h1>Hello 👋</h1>
     <p>
-        I really admire your honesty and the way you stand for what you believe in.
+        I really admire your honesty, pure heart and the way you stand for what you believe in.
         <br><br>
         Can’t wait to spend time with you today 😊
     </p>
@@ -135,25 +237,107 @@
         — From one web developer to another 💻✨
     </div>
 </div>
-
+<div id="gameOverScreen" class="game-over hidden">
+    <div class="game-over-card" id="gameOverCard">
+        <h2>🎬 Game Over</h2>
+        <p>Your Score</p>
+        <div class="final-score" id="finalScore">0</div>
+        <button class="btn btn-primary mt-3" id="restartBtn">
+            ▶ Play Again
+        </button>
+        <small class="d-block mt-2 text-muted">
+            Tap outside to restart
+        </small>
+    </div>
+</div>
+</div>
 <script>
-    const hearts = ["💖","💗","💜","💛"];
+
+
+
+
+    
+    
+    //const  = ["🍿","🎬","⭐"];
+    const icons = ["💖","💗","💜","💛"];
     let score = 0;
+    let gameOver = false;
+    let heartInterval;
+	let gameUnlocked = false;
+let baseSpawnDelay = 1200;   // slow start (ms)
+let minSpawnDelay = 350;    // max difficulty cap
+let spawnDelay = baseSpawnDelay;
+
+    const scoreEl = document.getElementById("score");
+    const finalScoreEl = document.getElementById("finalScore");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+    const heartsLayer = document.getElementById("hearts-layer");
 
     function updateScore() {
-        document.getElementById("score").innerText = score;
+        scoreEl.innerText = score;
     }
 
-    setInterval(() => {
+function unlockContent() {
+    if (gameUnlocked) return;
+
+    gameUnlocked = true;
+    document.getElementById("waitingScreen").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+    startGame();
+}
+function spawnHeartWithSpeed() {
+    if (gameOver) return;
+
+    spawnHeart();
+
+    // 🔥 Increase difficulty based on score
+    spawnDelay = Math.max(
+        minSpawnDelay,
+        baseSpawnDelay - score * 70
+    );
+
+    setTimeout(spawnHeartWithSpeed, spawnDelay);
+}
+
+function startGame() {
+    score = 0;
+    gameOver = false;
+    updateScore();
+
+    spawnDelay = baseSpawnDelay;
+    heartsLayer.innerHTML = "";
+    gameOverScreen.classList.add("hidden");
+
+    spawnHeartWithSpeed(); // start loop
+}
+
+
+    function endGame() {
+        gameOver = true;
+        clearInterval(heartInterval);
+
+        finalScoreEl.innerText = score;
+        gameOverScreen.classList.remove("hidden");
+    }
+
+    function spawnHeart() {
+        if (gameOver) return;
+
         const heart = document.createElement("div");
         heart.className = "heart";
-        heart.innerText = hearts[Math.floor(Math.random() * hearts.length)];
-        heart.style.left = Math.random() * 96 + "vw";
-        heart.style.fontSize = (16 + Math.random() * 10) + "px";
+        heart.innerText = icons[Math.floor(Math.random() * icons.length)];
+  		heart.style.left = Math.random() * 96 + "vw";
+        heart.style.fontSize = (18 + Math.random() * 8) + "px";
         heart.dataset.popped = "false";
 
+        heart.addEventListener("animationend", () => {
+            if (heart.dataset.popped === "false" && !gameOver) {
+                endGame();
+            }
+        });
+
         heart.addEventListener("click", () => {
-            if (heart.dataset.popped === "false") {
+            if (!gameOver && heart.dataset.popped === "false") {
                 heart.dataset.popped = "true";
                 score++;
                 updateScore();
@@ -162,14 +346,70 @@
             }
         });
 
-        document.body.appendChild(heart);
+        heartsLayer.appendChild(heart);
+    }
 
-        setTimeout(() => {
-            if (heart.parentNode) heart.remove();
-        }, 7000);
+    // Restart button
+    document.getElementById("restartBtn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        startGame();
+    });
 
-    }, 650);
+    // Click outside modal to restart
+    gameOverScreen.addEventListener("click", () => {
+        startGame();
+    });
+
+    // Prevent card clicks from closing
+    document.getElementById("gameOverCard").addEventListener("click", (e) => {
+        e.stopPropagation();
+    });
+
+ 
+    
+    function getMsUntilTargetIST(hour, minute) {
+    const now = new Date();
+
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istNow = new Date(utc + (5.5 * 60 * 60 * 1000));
+
+    const target = new Date(istNow);
+    target.setHours(hour, minute, 0, 0);
+
+    return target.getTime() - istNow.getTime();
+}
+
+    
+(function initTimeGate() {
+    const targetHour = 12;
+    const targetMinute = 40;
+
+    const msUntil = getMsUntilTargetIST(targetHour, targetMinute);
+
+    if (msUntil <= 0) {
+        // Already past target time
+        unlockContent();
+    } else {
+        // Show waiting screen
+        document.getElementById("waitingScreen").style.display = "flex";
+        document.getElementById("mainContent").style.display = "none";
+
+        // Exact unlock
+        setTimeout(unlockContent, msUntil);
+
+        // Safety check (tab sleep / mobile)
+        setInterval(() => {
+            if (!gameUnlocked && getMsUntilTargetIST(targetHour, targetMinute) <= 0) {
+                unlockContent();
+            }
+        }, 1000);
+    }
+})();
+
+
+    
 </script>
+
 
 </body>
 </html>
